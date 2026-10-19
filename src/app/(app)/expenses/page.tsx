@@ -7,7 +7,7 @@ import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function ExpensesPage() {
-  const { partners, expenses, actuals, rates } = await loadData();
+  const { partners, expenses, actuals, rates, canWrite } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const name = new Map(partners.map((p) => [p.id, p.name]));
@@ -17,7 +17,7 @@ export default async function ExpensesPage() {
     <>
       <PageHeader title={t("exp.title")} subtitle={t("exp.subtitle")} />
 
-      <Card title={t("exp.add")} className="mb-6">
+      {canWrite && <Card title={t("exp.add")} className="mb-6">
         {partners.length === 0 ? (
           <p className="text-sm text-zinc-500">{t("exp.addPartnerFirst")}</p>
         ) : (
@@ -35,7 +35,7 @@ export default async function ExpensesPage() {
             <div><button className={btnCls}>{t("exp.addBtn")}</button></div>
           </form>
         )}
-      </Card>
+      </Card>}
 
       <Card>
         {expenses.length === 0 ? (
@@ -55,7 +55,7 @@ export default async function ExpensesPage() {
                       <td className="py-2 pr-3">
                         <div className="font-medium">{e.name}</div>
                         <div className="text-xs text-zinc-500">{[e.category, e.notes].filter(Boolean).join(" · ")}</div>
-                        {e.is_variable && (
+                        {canWrite && e.is_variable && (
                           <form action={logActual} className="mt-1 flex items-center gap-1">
                             <input type="hidden" name="id" value={e.id} />
                             <input type="hidden" name="name" value={e.name} />
@@ -74,7 +74,7 @@ export default async function ExpensesPage() {
                         {e.currency !== cur && <div className="text-xs text-zinc-400">≈ {money(convert(e.amount, e.currency, cur, rates), cur, locale)}</div>}
                       </td>
                       <td className="pl-3 text-right">
-                        <form action={deleteExpense}><input type="hidden" name="id" value={e.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>
+                        {canWrite && <form action={deleteExpense}><input type="hidden" name="id" value={e.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
                       </td>
                     </tr>
                   );

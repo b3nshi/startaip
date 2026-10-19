@@ -10,15 +10,17 @@ const items: [string, Key][] = [
   ["/expenses", "nav.expenses"],
   ["/income", "nav.income"],
   ["/partners", "nav.partners"],
+  ["/team", "nav.team"],
+  ["/audit", "nav.audit"],
   ["/settings", "nav.settings"],
 ];
 
-export function Nav() {
+export function Nav({ showAudit }: { showAudit: boolean }) {
   const path = usePathname();
   const { t } = useI18n();
   return (
     <nav className="flex gap-1 overflow-x-auto md:flex-col">
-      {items.map(([href, key]) => (
+      {items.filter(([href]) => showAudit || href !== "/audit").map(([href, key]) => (
         <Link
           key={href}
           href={href}

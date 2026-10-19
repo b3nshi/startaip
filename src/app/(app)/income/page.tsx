@@ -7,20 +7,20 @@ import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function IncomePage() {
-  const { income, rates } = await loadData();
+  const { income, rates, canWrite } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   return (
     <>
       <PageHeader title={t("inc.title")} subtitle={t("inc.subtitle")} />
-      <Card title={t("inc.add")} className="mb-6">
+      {canWrite && <Card title={t("inc.add")} className="mb-6">
         <form action={addIncome} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field label={t("inc.desc")}><input name="description" required placeholder={t("inc.descPh")} className={inputCls} /></Field>
           <AmountFields />
           <RecurrenceFields />
           <div><button className={btnCls}>{t("inc.addBtn")}</button></div>
         </form>
-      </Card>
+      </Card>}
       <Card>
         {income.length === 0 ? (
           <p className="text-sm text-zinc-500">{t("inc.none")}</p>
@@ -43,7 +43,7 @@ export default async function IncomePage() {
                         {i.currency !== cur && <div className="text-xs text-zinc-400">≈ {money(convert(i.amount, i.currency, cur, rates), cur, locale)}</div>}
                       </td>
                       <td className="pl-3 text-right">
-                        <form action={deleteIncome}><input type="hidden" name="id" value={i.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>
+                        {canWrite && <form action={deleteIncome}><input type="hidden" name="id" value={i.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
                       </td>
                     </tr>
                   );

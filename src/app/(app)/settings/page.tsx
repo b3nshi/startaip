@@ -5,7 +5,7 @@ import { CURRENCIES } from "@/lib/currency";
 import { getT } from "@/lib/i18n/server";
 
 export default async function SettingsPage() {
-  const { rates, ratesUpdatedAt } = await loadData();
+  const { rates, ratesUpdatedAt, canWrite } = await loadData();
   const { t, locale } = await getT();
   return (
     <>
@@ -21,12 +21,12 @@ export default async function SettingsPage() {
               </Field>
             ) : (
               <Field key={c} label={t("set.perUsd", { cur: c })}>
-                <input name={c} type="number" step="any" min="0.000001" required defaultValue={rates[c]} className={inputCls} />
+                <input name={c} type="number" step="any" min="0.000001" required defaultValue={rates[c]} disabled={!canWrite} className={inputCls} />
               </Field>
             ),
           )}
           <div className="sm:col-span-3 flex items-center gap-3">
-            <button className={btnCls}>{t("set.save")}</button>
+            {canWrite && <button className={btnCls}>{t("set.save")}</button>}
             {ratesUpdatedAt && <span className="text-xs text-zinc-500">{t("set.updated", { date: new Date(ratesUpdatedAt).toLocaleDateString(locale === "es" ? "es-AR" : "en-US") })}</span>}
           </div>
         </form>

@@ -8,7 +8,7 @@ import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function PartnersPage() {
-  const { partners, expenses, actuals, transfers, rates } = await loadData();
+  const { partners, expenses, actuals, transfers, rates, canWrite } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const m = (n: number) => money(n, cur, locale);
@@ -69,8 +69,8 @@ export default async function PartnersPage() {
       </Card>
 
       <Card title={t("par.recordTitle")} className="mb-6">
-        <p className="mb-3 text-sm text-zinc-500">{t("par.recordHelp")}</p>
-        {partners.length < 2 ? (
+        {canWrite && <p className="mb-3 text-sm text-zinc-500">{t("par.recordHelp")}</p>}
+        {!canWrite ? null : partners.length < 2 ? (
           <p className="text-sm text-zinc-500">{t("par.needTwo")}</p>
         ) : (
           <form action={addTransfer} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -91,7 +91,7 @@ export default async function PartnersPage() {
             {transfers.map((x) => (
               <li key={x.id} className="flex items-center justify-between gap-3 py-2">
                 <span>{fmtDate(x.date, locale)} · {t("par.owesLine", { from: name.get(x.from_partner) ?? "?", to: name.get(x.to_partner) ?? "?", amount: money(x.amount, x.currency, locale) })}{x.note && <span className="text-zinc-500"> — {x.note}</span>}</span>
-                <form action={deleteTransfer}><input type="hidden" name="id" value={x.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>
+                {canWrite && <form action={deleteTransfer}><input type="hidden" name="id" value={x.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
               </li>
             ))}
           </ul>
@@ -99,18 +99,18 @@ export default async function PartnersPage() {
       </Card>
 
       <Card title={t("par.manage")}>
-        <p className="mb-3 text-sm text-zinc-500">{t("par.manageHelp")}</p>
-        <form action={addPartner} className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {canWrite && <p className="mb-3 text-sm text-zinc-500">{t("par.manageHelp")}</p>}
+        {canWrite && <form action={addPartner} className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label={t("common.name")}><input name="name" required className={inputCls} /></Field>
-          <Field label={t("common.email")}><input name="email" type="email" required className={inputCls} /></Field>
+          <Field label={t("common.email")}><input name="email" type="email" className={inputCls} /></Field>
           <Field label={t("par.equityLbl")}><input name="equity_pct" type="number" step="0.01" min="0" max="100" className={inputCls} /></Field>
           <div className="self-end"><button className={btnCls}>{t("par.addPartner")}</button></div>
-        </form>
+        </form>}
         <ul className="divide-y divide-zinc-100 text-sm">
           {partners.map((p) => (
             <li key={p.id} className="flex items-center justify-between py-2">
-              <span>{p.name} <span className="text-zinc-500">{p.email}</span></span>
-              <form action={deletePartner}><input type="hidden" name="id" value={p.id} /><button className={linkBtnCls}>{t("common.remove")}</button></form>
+              <span>{p.name} {p.email && <span className="text-zinc-500">{p.email}</span>}</span>
+              {canWrite && <form action={deletePartner}><input type="hidden" name="id" value={p.id} /><button className={linkBtnCls}>{t("common.remove")}</button></form>}
             </li>
           ))}
         </ul>

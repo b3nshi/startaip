@@ -1,12 +1,8 @@
 import nodemailer from "nodemailer";
-import { createClient } from "@/lib/supabase/server";
 
-/** Notify every partner. Never throws: a failed email must not fail the action. */
-export async function notifyPartners(subject: string, lines: string[]) {
+/** Send a simple HTML email over SMTP. Never throws: a failed email must not fail the action. */
+export async function sendMail(to: string[], subject: string, lines: string[]) {
   try {
-    const supabase = await createClient();
-    const { data: partners } = await supabase.from("partners").select("email");
-    const to = (partners ?? []).map((p) => p.email);
     const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM } = process.env;
     if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !EMAIL_FROM) {
       console.log(`[email skipped: SMTP_* / EMAIL_FROM not set] ${subject}`);
@@ -25,7 +21,7 @@ export async function notifyPartners(subject: string, lines: string[]) {
     });
     await transport.sendMail({ from: EMAIL_FROM, to, subject, html });
   } catch (e) {
-    console.error("notifyPartners failed", e);
+    console.error("sendMail failed", e);
   }
 }
 

@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getCompanyCtx } from "@/lib/company";
 import type { PartnerRow } from "@/lib/balances";
 import { CURRENCIES, DEFAULT_RATES, type Currency, type Rates } from "@/lib/currency";
 
@@ -17,14 +16,15 @@ export type Transfer = {
 const num = <T extends { amount: unknown }>(r: T) => ({ ...r, amount: Number(r.amount) });
 
 export async function loadData() {
-  const supabase = await createClient();
+  const { supabase, company, canWrite, isOwner, role } = await getCompanyCtx();
+  const cid = company.id;
   const [partners, expenses, actuals, income, transfers, rateRows] = await Promise.all([
-    supabase.from("partners").select("*").order("created_at"),
-    supabase.from("expenses").select("*").order("start_date", { ascending: false }),
-    supabase.from("expense_actuals").select("*"),
-    supabase.from("income").select("*").order("start_date", { ascending: false }),
-    supabase.from("partner_transfers").select("*").order("date", { ascending: false }),
-    supabase.from("exchange_rates").select("*"),
+    supabase.from("partners").select("*").eq("company_id", cid).order("created_at"),
+    supabase.from("expenses").select("*").eq("company_id", cid).order("start_date", { ascending: false }),
+    supabase.from("expense_actuals").select("*").eq("company_id", cid),
+    supabase.from("income").select("*").eq("company_id", cid).order("start_date", { ascending: false }),
+    supabase.from("partner_transfers").select("*").eq("company_id", cid).order("date", { ascending: false }),
+    supabase.from("exchange_rates").select("*").eq("company_id", cid),
   ]);
   const failed = [partners, expenses, actuals, income, transfers, rateRows].find((r) => r.error);
   if (failed?.error) throw new Error(failed.error.message);
@@ -34,6 +34,7 @@ export async function loadData() {
   const ratesUpdatedAt = (rateRows.data ?? []).map((r) => r.updated_at as string).sort().pop() ?? null;
 
   return {
+    company, canWrite, isOwner, role,
     rates,
     ratesUpdatedAt,
     partners: (partners.data ?? []).map((p) => ({ ...p, equity_pct: p.equity_pct == null ? null : Number(p.equity_pct) })) as PartnerRow[],
@@ -43,11 +44,4 @@ export async function loadData() {
     income: (income.data ?? []).map(num) as Income[],
     transfers: (transfers.data ?? []).map(num) as Transfer[],
   };
-}
-
-export async function requireUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  return { supabase, user };
 }
