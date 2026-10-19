@@ -11,7 +11,7 @@
     "db:push": "supabase db push",
     "db:new": "supabase migration new",
     "db:diff": "supabase db diff",
-    "db:config": "supabase config push"
+    "db:config": "set -a && . ./.env.local && set +a && supabase config push"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

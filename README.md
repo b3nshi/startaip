@@ -15,7 +15,7 @@ Database changes live in `supabase/migrations/` (timestamped SQL files, applied 
    ```bash
    npm run db:push
    ```
-3. Email templates + sign-in code length live in `supabase/config.toml` and `supabase/templates/` (the code email uses `{{ .Token }}` for both existing users and new sign-ups). Push them with `npm run db:config`. For real email delivery set **Auth → SMTP Settings** in the dashboard (Supabase's built-in mailer is heavily rate-limited), e.g. Forward Email: host `smtp.forwardemail.net`, port 465, with a generated alias password. Login codes are sent by Supabase; change notifications are sent by this app (below).
+3. Email templates + sign-in code length live in `supabase/config.toml` and `supabase/templates/` (the code email uses `{{ .Token }}` for both existing users and new sign-ups). `npm run db:config` pushes them together with your SMTP settings (read from `.env.local`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_ADMIN_EMAIL`). Supabase requires custom SMTP before it allows template changes, and its built-in mailer is heavily rate-limited anyway. Login codes are sent by Supabase through that SMTP; change notifications are sent by this app (below).
 4. `cp .env.example .env.local` and fill in the keys (Supabase URL, anon key, service role key, `NEXT_PUBLIC_APP_URL`, optional `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` + `EMAIL_FROM`).
 5. `npm run dev` → http://localhost:3000, then sign up. No manual seeding is needed.
 
