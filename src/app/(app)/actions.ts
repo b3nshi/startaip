@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getCompanyCtx } from "@/lib/company";
 import { sendMail } from "@/lib/email";
 import { intervalLabel } from "@/lib/recurrence";
@@ -59,6 +60,7 @@ export async function addExpense(form: FormData) {
     end_date: optional(form, "end_date"),
     is_variable: form.get("is_variable") === "on",
     notes: optional(form, "notes"),
+    service_id: optional(form, "service_id"),
   };
   const { error } = await supabase.from("expenses").insert(row);
   if (error) throw new Error(error.message);
@@ -104,6 +106,7 @@ export async function addIncome(form: FormData) {
     interval_months: intervalOf(form, t),
     start_date: str(form, "start_date"),
     end_date: optional(form, "end_date"),
+    service_id: optional(form, "service_id"),
   };
   const { error } = await supabase.from("income").insert(row);
   if (error) throw new Error(error.message);
@@ -117,6 +120,72 @@ export async function addIncome(form: FormData) {
 export async function deleteIncome(form: FormData) {
   const { supabase } = await ctx();
   const { error } = await supabase.from("income").delete().eq("id", str(form, "id"));
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+}
+
+export async function addService(form: FormData) {
+  const c = await ctx();
+  const { supabase, by, t, cid } = c;
+  const row = {
+    company_id: cid,
+    name: str(form, "name"),
+    url: optional(form, "url"),
+    account_email: optional(form, "account_email")?.toLowerCase() ?? null,
+    created_by_partner: optional(form, "created_by_partner"),
+    created_on: optional(form, "created_on"),
+    description: optional(form, "description"),
+  };
+  const { error } = await supabase.from("services").insert(row);
+  if (error) throw new Error(error.message);
+  await notifyPartners(c, t("mail.newService", { name: row.name }), [
+    t("mail.addedService", { by }),
+    ...(row.url ? [t("mail.serviceUrl", { url: row.url })] : []),
+    ...(row.description ? [t("mail.serviceUse", { text: row.description })] : []),
+  ]);
+  revalidatePath("/", "layout");
+}
+
+export async function deleteService(form: FormData) {
+  const { supabase } = await ctx();
+  const { error } = await supabase.from("services").delete().eq("id", str(form, "id"));
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+  redirect("/services");
+}
+
+export async function addCashIn(form: FormData) {
+  const c = await ctx();
+  const { supabase, by, t, locale, cid } = c;
+  const row = {
+    company_id: cid,
+    contributed_by: str(form, "contributed_by"),
+    received_by: optional(form, "received_by"),
+    amount: amountOf(form, t),
+    currency: currencyOf(form),
+    date: str(form, "date"),
+    concept: str(form, "concept"),
+    method: optional(form, "method"),
+  };
+  if (!(row.amount > 0)) throw new Error(t("err.amount"));
+  if (row.received_by === row.contributed_by) throw new Error(t("err.pickTwo"));
+  const { error } = await supabase.from("cash_ins").insert(row);
+  if (error) throw new Error(error.message);
+  const ids = [row.contributed_by, ...(row.received_by ? [row.received_by] : [])];
+  const { data: ps } = await supabase.from("partners").select("id,name").in("id", ids);
+  const name = (id: string) => ps?.find((p) => p.id === id)?.name ?? "?";
+  await notifyPartners(c, t("mail.newCashIn", { name: row.concept, amount: money(row.amount, row.currency, locale) }), [
+    t("mail.addedCashIn", { by, from: name(row.contributed_by) }),
+    row.received_by ? t("mail.cashInReceiver", { name: name(row.received_by) }) : t("mail.cashInCompany"),
+    ...(row.method ? [t("mail.cashInVia", { method: row.method })] : []),
+    t("mail.countsAs", { name: name(row.contributed_by) }),
+  ]);
+  revalidatePath("/", "layout");
+}
+
+export async function deleteCashIn(form: FormData) {
+  const { supabase } = await ctx();
+  const { error } = await supabase.from("cash_ins").delete().eq("id", str(form, "id"));
   if (error) throw new Error(error.message);
   revalidatePath("/", "layout");
 }

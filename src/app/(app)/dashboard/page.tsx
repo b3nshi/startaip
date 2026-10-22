@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { loadData } from "@/lib/data";
 import { Card, PageHeader } from "@/components/ui";
 import { MonthlyChart, type MonthPoint } from "@/components/monthly-chart";
@@ -7,7 +8,7 @@ import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function Dashboard() {
-  const { expenses, income, actuals, partners, rates } = await loadData();
+  const { expenses, income, actuals, partners, rates, services, cashIns, memberCount } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const m = (n: number) => money(n, cur, locale);
@@ -54,6 +55,16 @@ export default async function Dashboard() {
     [t("dash.runRate"), m(burn), t("dash.incRec", { n: m(mrr) })],
   ];
 
+  const cashThisMonth = cashIns.filter((c) => c.date.startsWith(current)).reduce((a, c) => a + conv(c.amount, c.currency), 0);
+  const cashTotal = cashIns.reduce((a, c) => a + conv(c.amount, c.currency), 0);
+  const paidServices = new Set(expenses.map((e) => e.service_id).filter(Boolean)).size;
+  const company = [
+    [t("dash.services"), String(services.length), t("dash.servicesSub", { n: paidServices, m: Math.max(0, services.length - paidServices) }), "/services"],
+    [t("dash.partners"), String(partners.length), "", "/partners"],
+    [t("dash.team"), String(memberCount), "", "/team"],
+    [t("dash.cashIn"), m(cashThisMonth), t("dash.cashInSub", { total: m(cashTotal) }), "/cash-in"],
+  ];
+
   return (
     <>
       <PageHeader title={t("dash.title")} subtitle={t("dash.subtitle", { cur })} />
@@ -64,6 +75,15 @@ export default async function Dashboard() {
             <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
             {sub && <div className="mt-1 text-xs text-zinc-500">{sub}</div>}
           </Card>
+        ))}
+      </div>
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {company.map(([label, value, sub, href]) => (
+          <Link key={label} href={href} className="block rounded-2xl border border-zinc-200 bg-white p-5 hover:border-zinc-400">
+            <div className="text-xs font-medium text-zinc-500">{label}</div>
+            <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
+            {sub && <div className="mt-1 text-xs text-zinc-500">{sub}</div>}
+          </Link>
         ))}
       </div>
       <Card title={t("dash.perMonth")} className="mb-6">

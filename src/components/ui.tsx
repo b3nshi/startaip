@@ -78,3 +78,16 @@ export async function RecurrenceFields({ includeVariable = false }: { includeVar
     </>
   );
 }
+
+/** Optional link to a service, for expense and income forms. */
+export async function ServiceSelect({ services }: { services: { id: string; name: string }[] }) {
+  const { t } = await getT();
+  return (
+    <Field label={t("svc.label")}>
+      <select name="service_id" defaultValue="" className={inputCls}>
+        <option value="">{t("svc.noService")}</option>
+        {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+      </select>
+    </Field>
+  );
+}

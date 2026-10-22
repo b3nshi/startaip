@@ -7,9 +7,12 @@ import type { Key } from "@/lib/i18n/dict";
 
 const items: [string, Key][] = [
   ["/dashboard", "nav.dashboard"],
+  ["/services", "nav.services"],
   ["/expenses", "nav.expenses"],
   ["/income", "nav.income"],
+  ["/cash-in", "nav.cashin"],
   ["/partners", "nav.partners"],
+  ["/balance", "nav.balance"],
   ["/team", "nav.team"],
   ["/audit", "nav.audit"],
   ["/settings", "nav.settings"],

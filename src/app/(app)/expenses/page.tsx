@@ -1,16 +1,18 @@
+import Link from "next/link";
 import { loadData } from "@/lib/data";
 import { addExpense, deleteExpense, logActual } from "../actions";
-import { AmountFields, Card, Field, PageHeader, RecurrenceFields, btnCls, inputCls, linkBtnCls } from "@/components/ui";
+import { AmountFields, Card, Field, PageHeader, RecurrenceFields, ServiceSelect, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { intervalLabel, nextCharge, todayISO } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function ExpensesPage() {
-  const { partners, expenses, actuals, rates, canWrite } = await loadData();
+  const { partners, expenses, actuals, rates, services, canWrite } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const name = new Map(partners.map((p) => [p.id, p.name]));
+  const serviceName = new Map(services.map((s) => [s.id, s.name]));
   const thisMonth = todayISO().slice(0, 7);
 
   return (
@@ -30,6 +32,7 @@ export default async function ExpensesPage() {
                 {partners.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </Field>
+            <ServiceSelect services={services} />
             <RecurrenceFields includeVariable />
             <Field label={t("common.notes")} className="sm:col-span-2 lg:col-span-3"><input name="notes" className={inputCls} /></Field>
             <div><button className={btnCls}>{t("exp.addBtn")}</button></div>
@@ -54,7 +57,10 @@ export default async function ExpensesPage() {
                     <tr key={e.id} className="border-t border-zinc-100 align-top">
                       <td className="py-2 pr-3">
                         <div className="font-medium">{e.name}</div>
-                        <div className="text-xs text-zinc-500">{[e.category, e.notes].filter(Boolean).join(" · ")}</div>
+                        <div className="text-xs text-zinc-500">
+                          {e.service_id && serviceName.has(e.service_id) && <><Link href={`/services/${e.service_id}`} className="underline">{serviceName.get(e.service_id)}</Link>{(e.category || e.notes) && " · "}</>}
+                          {[e.category, e.notes].filter(Boolean).join(" · ")}
+                        </div>
                         {canWrite && e.is_variable && (
                           <form action={logActual} className="mt-1 flex items-center gap-1">
                             <input type="hidden" name="id" value={e.id} />

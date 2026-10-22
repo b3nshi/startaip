@@ -13,17 +13,18 @@ export default async function AuditPage() {
   if (!canWrite) redirect("/dashboard");
   const { t, locale } = await getT();
 
-  const [{ data: log }, { data: partners }] = await Promise.all([
+  const [{ data: log }, { data: partners }, { data: services }] = await Promise.all([
     supabase.from("audit_log").select("*").eq("company_id", company.id).order("id", { ascending: false }).limit(LIMIT),
     supabase.from("partners").select("id,name").eq("company_id", company.id),
+    supabase.from("services").select("id,name").eq("company_id", company.id),
   ]);
-  const names = new Map((partners ?? []).map((p) => [p.id, p.name]));
+  const names = new Map([...(partners ?? []), ...(services ?? [])].map((p) => [p.id, p.name]));
   const show = (k: string, v: unknown) => (typeof v === "string" && names.has(v) ? names.get(v)! : v === null || v === "" ? "—" : String(v));
 
   /** Short human label for the record, then the fields shown (all on create/delete, only diffs on update). */
   function describe(a: { action: string; old_data: Row | null; new_data: Row | null }) {
     const row = (a.new_data ?? a.old_data ?? {}) as Row;
-    const label = String(row.name ?? row.description ?? row.email ?? row.currency ?? row.month ?? "");
+    const label = String(row.name ?? row.description ?? row.concept ?? row.email ?? row.currency ?? row.month ?? "");
     const keys = Object.keys(row).filter((k) => !HIDDEN.has(k));
     if (a.action === "update" && a.old_data && a.new_data) {
       const changed = keys.filter((k) => JSON.stringify(a.old_data![k]) !== JSON.stringify(a.new_data![k]));

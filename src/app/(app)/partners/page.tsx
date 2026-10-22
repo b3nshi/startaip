@@ -1,72 +1,20 @@
 import { loadData } from "@/lib/data";
 import { addPartner, addTransfer, deletePartner, deleteTransfer } from "../actions";
 import { AmountFields, Card, Field, PageHeader, btnCls, inputCls, linkBtnCls } from "@/components/ui";
-import { computeBalances, settlements } from "@/lib/balances";
-import { occurrences, todayISO } from "@/lib/recurrence";
+import { todayISO } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
-import { convert } from "@/lib/currency";
-import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { getT } from "@/lib/i18n/server";
 
 export default async function PartnersPage() {
-  const { partners, expenses, actuals, transfers, rates, canWrite } = await loadData();
+  const { partners, transfers, canWrite } = await loadData();
   const { t, locale } = await getT();
-  const cur = await getDisplayCurrency();
-  const m = (n: number) => money(n, cur, locale);
   const today = todayISO();
 
-  // Everything is converted to the display currency before comparing partners.
-  const spentBy = new Map<string, number>();
-  for (const e of expenses) {
-    const total = occurrences(e, today, actuals).reduce((a, o) => a + convert(o.amount, e.currency, cur, rates), 0);
-    spentBy.set(e.paid_by, (spentBy.get(e.paid_by) ?? 0) + total);
-  }
-  const converted = transfers.map((x) => ({ ...x, amount: convert(x.amount, x.currency, cur, rates) }));
-  const { balances, total, pct } = computeBalances(partners, spentBy, converted);
-  const plan = settlements(balances);
   const name = new Map(partners.map((p) => [p.id, p.name]));
 
   return (
     <>
-      <PageHeader title={t("par.title")} subtitle={t("par.subtitle", { total: m(total), cur })} />
-
-      <Card title={t("par.balances")} className="mb-6">
-        {balances.length === 0 ? (
-          <p className="text-sm text-zinc-500">{t("par.addFirst")}</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs text-zinc-500">
-                <tr>
-                  <th className="pb-2">{t("par.partner")}</th><th className="text-right">{t("par.paid")}</th><th className="text-right">{t("par.owedToThem")}</th>
-                  <th className="text-right">{t("par.theyOwe")}</th><th className="text-right">{t("par.invested")}</th><th className="text-right">{t("par.share")}</th><th className="text-right">{t("par.balance")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {balances.map((b) => (
-                  <tr key={b.partner.id} className="border-t border-zinc-100">
-                    <td className="py-2"><div className="font-medium">{b.partner.name}</div><div className="text-xs text-zinc-500">{t("par.equity", { pct: pct(b.partner).toFixed(0) })}</div></td>
-                    <td className="text-right tabular-nums">{m(b.paid)}</td>
-                    <td className="text-right tabular-nums">{m(b.credits)}</td>
-                    <td className="text-right tabular-nums">{m(b.debts)}</td>
-                    <td className="text-right font-medium tabular-nums">{m(b.invested)}</td>
-                    <td className="text-right tabular-nums">{m(b.share)}</td>
-                    <td className={`text-right font-medium tabular-nums ${b.net >= 0 ? "text-emerald-700" : "text-red-600"}`}>
-                      {b.net >= 0 ? "+" : ""}{m(b.net)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="mt-2 text-xs text-zinc-500">{t("par.balanceHelp")}</p>
-          </div>
-        )}
-        {plan.length > 0 && (
-          <div className="mt-4 rounded-lg bg-zinc-50 p-3 text-sm">
-            <div className="mb-1 text-xs font-semibold text-zinc-500">{t("par.toEvenOut")}</div>
-            {plan.map((s, i) => <div key={i}>{t("par.owesLine", { from: s.from.name, to: s.to.name, amount: m(s.amount) })}</div>)}
-          </div>
-        )}
-      </Card>
+      <PageHeader title={t("par.title")} subtitle={t("par.subtitle")} />
 
       <Card title={t("par.recordTitle")} className="mb-6">
         {canWrite && <p className="mb-3 text-sm text-zinc-500">{t("par.recordHelp")}</p>}

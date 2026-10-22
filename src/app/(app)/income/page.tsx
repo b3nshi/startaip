@@ -1,15 +1,17 @@
+import Link from "next/link";
 import { loadData } from "@/lib/data";
 import { addIncome, deleteIncome } from "../actions";
-import { AmountFields, Card, Field, PageHeader, RecurrenceFields, btnCls, inputCls, linkBtnCls } from "@/components/ui";
+import { AmountFields, Card, Field, PageHeader, RecurrenceFields, ServiceSelect, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { intervalLabel, nextCharge } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function IncomePage() {
-  const { income, rates, canWrite } = await loadData();
+  const { income, rates, services, canWrite } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
+  const serviceName = new Map(services.map((s) => [s.id, s.name]));
   return (
     <>
       <PageHeader title={t("inc.title")} subtitle={t("inc.subtitle")} />
@@ -17,6 +19,7 @@ export default async function IncomePage() {
         <form action={addIncome} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field label={t("inc.desc")}><input name="description" required placeholder={t("inc.descPh")} className={inputCls} /></Field>
           <AmountFields />
+          <ServiceSelect services={services} />
           <RecurrenceFields />
           <div><button className={btnCls}>{t("inc.addBtn")}</button></div>
         </form>
@@ -35,7 +38,10 @@ export default async function IncomePage() {
                   const next = nextCharge(i);
                   return (
                     <tr key={i.id} className="border-t border-zinc-100">
-                      <td className="py-2 font-medium">{i.description}</td>
+                      <td className="py-2">
+                        <div className="font-medium">{i.description}</div>
+                        {i.service_id && serviceName.has(i.service_id) && <Link href={`/services/${i.service_id}`} className="text-xs text-zinc-500 underline">{serviceName.get(i.service_id)}</Link>}
+                      </td>
                       <td>{intervalLabel(i.interval_months, t)}</td>
                       <td>{next ? fmtDate(next, locale) : i.interval_months ? t("exp.ended") : fmtDate(i.start_date, locale)}</td>
                       <td className="text-right tabular-nums">
