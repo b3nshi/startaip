@@ -1,19 +1,20 @@
+import Link from "next/link";
 import { loadData } from "@/lib/data";
 import { addCashIn, deleteCashIn } from "../actions";
-import { AmountFields, Card, Field, PageHeader, btnCls, inputCls, linkBtnCls } from "@/components/ui";
+import { AmountFields, Card, Field, PageHeader, RateHint, RateSelect, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { todayISO } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function CashInPage() {
-  const { partners, cashIns, rates, canWrite } = await loadData();
+  const { partners, cashIns, rateSets, rateSetFor, ratesFor, canWrite } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const name = new Map(partners.map((p) => [p.id, p.name]));
 
   const byPartner = new Map<string, number>();
-  for (const c of cashIns) byPartner.set(c.contributed_by, (byPartner.get(c.contributed_by) ?? 0) + convert(c.amount, c.currency, cur, rates));
+  for (const c of cashIns) byPartner.set(c.contributed_by, (byPartner.get(c.contributed_by) ?? 0) + convert(c.amount, c.currency, cur, ratesFor(c)));
   const total = [...byPartner.values()].reduce((a, b) => a + b, 0);
 
   return (
@@ -38,6 +39,7 @@ export default async function CashInPage() {
               </Field>
               <Field label={t("common.date")}><input name="date" type="date" required defaultValue={todayISO()} className={inputCls} /></Field>
               <AmountFields min="0.01" />
+              <RateSelect rateSets={rateSets} />
               <Field label={t("cash.method")}><input name="method" placeholder={t("cash.methodPh")} className={inputCls} /></Field>
               <Field label={t("cash.concept")} className="sm:col-span-2 lg:col-span-3"><input name="concept" required placeholder={t("cash.conceptPh")} className={inputCls} /></Field>
               <div><button className={btnCls}>{t("cash.addBtn")}</button></div>
@@ -74,10 +76,12 @@ export default async function CashInPage() {
                     <td className="pr-3 text-zinc-500">{c.method ?? "—"}</td>
                     <td className="text-right tabular-nums">
                       <div>{money(c.amount, c.currency, locale)}</div>
-                      {c.currency !== cur && <div className="text-xs text-zinc-400">≈ {money(convert(c.amount, c.currency, cur, rates), cur, locale)}</div>}
+                      {c.currency !== cur && <div className="text-xs text-zinc-400">≈ {money(convert(c.amount, c.currency, cur, ratesFor(c)), cur, locale)}</div>}
+                      <RateHint from={c.currency} to={cur} rateSet={rateSetFor(c)} />
                     </td>
-                    <td className="pl-3 text-right">
-                      {canWrite && <form action={deleteCashIn}><input type="hidden" name="id" value={c.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
+                    <td className="pl-3 text-right whitespace-nowrap">
+                      <Link href={`/cash-in/${c.id}`} className="mr-3 text-xs text-zinc-500 underline">{t("common.details")}</Link>
+                      {canWrite && <form action={deleteCashIn} className="inline"><input type="hidden" name="id" value={c.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
                     </td>
                   </tr>
                 ))}

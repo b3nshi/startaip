@@ -7,7 +7,7 @@ import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function BalancePage() {
-  const { partners, expenses, actuals, transfers, cashIns, rates } = await loadData();
+  const { partners, expenses, actuals, transfers, cashIns, ratesFor } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const m = (n: number) => money(n, cur, locale);
@@ -16,10 +16,10 @@ export default async function BalancePage() {
   // Everything is converted to the display currency before comparing partners.
   const spentBy = new Map<string, number>();
   for (const e of expenses) {
-    const total = occurrences(e, today, actuals).reduce((a, o) => a + convert(o.amount, e.currency, cur, rates), 0);
+    const total = occurrences(e, today, actuals).reduce((a, o) => a + convert(o.amount, e.currency, cur, ratesFor(e, o.date)), 0);
     spentBy.set(e.paid_by, (spentBy.get(e.paid_by) ?? 0) + total);
   }
-  const conv = <T extends { amount: number; currency: typeof cur }>(r: T) => ({ ...r, amount: convert(r.amount, r.currency, cur, rates) });
+  const conv = <T extends { amount: number; currency: typeof cur; rate_set_id: string }>(r: T) => ({ ...r, amount: convert(r.amount, r.currency, cur, ratesFor(r)) });
   const { balances, total, pct } = computeBalances(partners, spentBy, transfers.map(conv), cashIns.map(conv));
   const plan = settlements(balances);
   const signed = (n: number) => `${n >= 0 ? "+" : ""}${m(n)}`;

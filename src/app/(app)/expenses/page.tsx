@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { loadData } from "@/lib/data";
 import { addExpense, deleteExpense, logActual } from "../actions";
-import { AmountFields, Card, Field, PageHeader, RecurrenceFields, ServiceSelect, btnCls, inputCls, linkBtnCls } from "@/components/ui";
+import { AmountFields, Card, Field, PageHeader, RateHint, RateSelect, RecurrenceFields, ServiceSelect, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { intervalLabel, nextCharge, todayISO } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function ExpensesPage() {
-  const { partners, expenses, actuals, rates, services, canWrite } = await loadData();
+  const { partners, expenses, actuals, rateSets, rateSetFor, ratesFor, services, canWrite } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const name = new Map(partners.map((p) => [p.id, p.name]));
@@ -33,6 +33,7 @@ export default async function ExpensesPage() {
               </select>
             </Field>
             <ServiceSelect services={services} />
+            <RateSelect rateSets={rateSets} withMode />
             <RecurrenceFields includeVariable />
             <Field label={t("common.notes")} className="sm:col-span-2 lg:col-span-3"><input name="notes" className={inputCls} /></Field>
             <div><button className={btnCls}>{t("exp.addBtn")}</button></div>
@@ -77,10 +78,12 @@ export default async function ExpensesPage() {
                       <td className="pr-3">{next ? fmtDate(next, locale) : e.interval_months ? t("exp.ended") : fmtDate(e.start_date, locale)}</td>
                       <td className="text-right tabular-nums">
                         <div>{e.is_variable && "~"}{money(e.amount, e.currency, locale)}</div>
-                        {e.currency !== cur && <div className="text-xs text-zinc-400">≈ {money(convert(e.amount, e.currency, cur, rates), cur, locale)}</div>}
+                        {e.currency !== cur && <div className="text-xs text-zinc-400">≈ {money(convert(e.amount, e.currency, cur, ratesFor(e, todayISO())), cur, locale)}</div>}
+                        <RateHint from={e.currency} to={cur} rateSet={rateSetFor(e, todayISO())} />
                       </td>
-                      <td className="pl-3 text-right">
-                        {canWrite && <form action={deleteExpense}><input type="hidden" name="id" value={e.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
+                      <td className="pl-3 text-right whitespace-nowrap">
+                        <Link href={`/expenses/${e.id}`} className="mr-3 text-xs text-zinc-500 underline">{t("common.details")}</Link>
+                        {canWrite && <form action={deleteExpense} className="inline"><input type="hidden" name="id" value={e.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
                       </td>
                     </tr>
                   );

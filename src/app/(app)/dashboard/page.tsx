@@ -8,11 +8,11 @@ import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function Dashboard() {
-  const { expenses, income, actuals, partners, rates, services, cashIns, memberCount } = await loadData();
+  const { expenses, income, actuals, partners, ratesFor, services, cashIns, memberCount } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const m = (n: number) => money(n, cur, locale);
-  const conv = (n: number, from: typeof cur) => convert(n, from, cur, rates);
+  const conv = (n: number, from: typeof cur, r: Parameters<typeof ratesFor>[0], date?: string) => convert(n, from, cur, ratesFor(r, date));
 
   const today = todayISO();
   const current = today.slice(0, 7);
@@ -27,19 +27,19 @@ export default async function Dashboard() {
   for (const e of expenses) {
     for (const o of occurrences(e, lastDay, actuals)) {
       const p = points.get(o.month);
-      if (p) p[e.interval_months ? "recurring" : "oneTime"] += conv(o.amount, e.currency);
+      if (p) p[e.interval_months ? "recurring" : "oneTime"] += conv(o.amount, e.currency, e, o.date);
     }
   }
   for (const i of income) {
     for (const o of occurrences(i, lastDay)) {
       const p = points.get(o.month);
-      if (p) p.income += conv(o.amount, i.currency);
+      if (p) p.income += conv(o.amount, i.currency, i, o.date);
     }
   }
 
   const now = points.get(current)!;
-  const burn = expenses.reduce((a, e) => a + conv(monthlyEquivalent(e, today), e.currency), 0);
-  const mrr = income.reduce((a, i) => a + conv(monthlyEquivalent(i, today), i.currency), 0);
+  const burn = expenses.reduce((a, e) => a + conv(monthlyEquivalent(e, today), e.currency, e, today), 0);
+  const mrr = income.reduce((a, i) => a + conv(monthlyEquivalent(i, today), i.currency, i, today), 0);
 
   const horizon = new Date(Date.now() + 60 * 864e5).toISOString().slice(0, 10);
   const upcoming = expenses
@@ -55,8 +55,8 @@ export default async function Dashboard() {
     [t("dash.runRate"), m(burn), t("dash.incRec", { n: m(mrr) })],
   ];
 
-  const cashThisMonth = cashIns.filter((c) => c.date.startsWith(current)).reduce((a, c) => a + conv(c.amount, c.currency), 0);
-  const cashTotal = cashIns.reduce((a, c) => a + conv(c.amount, c.currency), 0);
+  const cashThisMonth = cashIns.filter((c) => c.date.startsWith(current)).reduce((a, c) => a + conv(c.amount, c.currency, c), 0);
+  const cashTotal = cashIns.reduce((a, c) => a + conv(c.amount, c.currency, c), 0);
   const paidServices = new Set(expenses.map((e) => e.service_id).filter(Boolean)).size;
   const company = [
     [t("dash.services"), String(services.length), t("dash.servicesSub", { n: paidServices, m: Math.max(0, services.length - paidServices) }), "/services"],

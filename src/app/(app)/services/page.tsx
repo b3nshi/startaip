@@ -8,14 +8,14 @@ import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
 
 export default async function ServicesPage() {
-  const { services, partners, expenses, income, rates, canWrite } = await loadData();
+  const { services, partners, expenses, income, ratesFor, canWrite } = await loadData();
   const { t, locale } = await getT();
   const cur = await getDisplayCurrency();
   const today = todayISO();
   const partnerName = new Map(partners.map((p) => [p.id, p.name]));
 
-  const cost = (id: string) => expenses.filter((e) => e.service_id === id).reduce((a, e) => a + convert(monthlyEquivalent(e, today), e.currency, cur, rates), 0);
-  const earns = (id: string) => income.filter((i) => i.service_id === id).reduce((a, i) => a + convert(monthlyEquivalent(i, today), i.currency, cur, rates), 0);
+  const cost = (id: string) => expenses.filter((e) => e.service_id === id).reduce((a, e) => a + convert(monthlyEquivalent(e, today), e.currency, cur, ratesFor(e, today)), 0);
+  const earns = (id: string) => income.filter((i) => i.service_id === id).reduce((a, i) => a + convert(monthlyEquivalent(i, today), i.currency, cur, ratesFor(i, today)), 0);
 
   return (
     <>
