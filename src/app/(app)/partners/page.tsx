@@ -5,6 +5,7 @@ import { AmountFields, Card, Field, PageHeader, RateSelect, btnCls, inputCls, li
 import { todayISO } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
 import { getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function PartnersPage() {
   const { partners, transfers, rateSets, canWrite } = await loadData();
@@ -33,7 +34,7 @@ export default async function PartnersPage() {
             <RateSelect rateSets={rateSets} />
             <Field label={t("common.date")}><input name="date" type="date" required defaultValue={today} className={inputCls} /></Field>
             <Field label={t("common.note")} className="sm:col-span-2"><input name="note" placeholder={t("par.notePh")} className={inputCls} /></Field>
-            <div><button className={btnCls}>{t("par.record")}</button></div>
+            <div><SubmitButton className={btnCls}>{t("par.record")}</SubmitButton></div>
           </form>
         )}
         {transfers.length > 0 && (
@@ -43,7 +44,7 @@ export default async function PartnersPage() {
                 <span>{fmtDate(x.date, locale)} · {t("par.owesLine", { from: name.get(x.from_partner) ?? "?", to: name.get(x.to_partner) ?? "?", amount: money(x.amount, x.currency, locale) })}{x.note && <span className="text-zinc-500"> — {x.note}</span>}</span>
                 <span className="whitespace-nowrap">
                   <Link href={`/partners/transfers/${x.id}`} className="mr-3 text-xs text-zinc-500 underline">{t("common.details")}</Link>
-                  {canWrite && <form action={deleteTransfer} className="inline"><input type="hidden" name="id" value={x.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
+                  {canWrite && <form action={deleteTransfer} className="inline"><input type="hidden" name="id" value={x.id} /><SubmitButton className={linkBtnCls}>{t("common.delete")}</SubmitButton></form>}
                 </span>
               </li>
             ))}
@@ -57,7 +58,7 @@ export default async function PartnersPage() {
           <Field label={t("common.name")}><input name="name" required className={inputCls} /></Field>
           <Field label={t("common.email")}><input name="email" type="email" className={inputCls} /></Field>
           <Field label={t("par.equityLbl")}><input name="equity_pct" type="number" step="0.01" min="0" max="100" className={inputCls} /></Field>
-          <div className="self-end"><button className={btnCls}>{t("par.addPartner")}</button></div>
+          <div className="self-end"><SubmitButton className={btnCls}>{t("par.addPartner")}</SubmitButton></div>
         </form>}
         <ul className="divide-y divide-zinc-100 text-sm">
           {partners.map((p) => (
@@ -65,7 +66,7 @@ export default async function PartnersPage() {
               <span>{p.name} {p.email && <span className="text-zinc-500">{p.email}</span>}</span>
               <span className="whitespace-nowrap">
                 <Link href={`/partners/${p.id}`} className="mr-3 text-xs text-zinc-500 underline">{canWrite ? t("common.edit") : t("common.details")}</Link>
-                {canWrite && <form action={deletePartner} className="inline"><input type="hidden" name="id" value={p.id} /><button className={linkBtnCls}>{t("common.remove")}</button></form>}
+                {canWrite && <form action={deletePartner} className="inline"><input type="hidden" name="id" value={p.id} /><SubmitButton className={linkBtnCls}>{t("common.remove")}</SubmitButton></form>}
               </span>
             </li>
           ))}

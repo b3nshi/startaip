@@ -6,6 +6,7 @@ import { intervalLabel, nextCharge, todayISO } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function ExpensesPage() {
   const { partners, expenses, actuals, rateSets, rateSetFor, ratesFor, services, canWrite } = await loadData();
@@ -36,7 +37,7 @@ export default async function ExpensesPage() {
             <RateSelect rateSets={rateSets} withMode />
             <RecurrenceFields includeVariable />
             <Field label={t("common.notes")} className="sm:col-span-2 lg:col-span-3"><input name="notes" className={inputCls} /></Field>
-            <div><button className={btnCls}>{t("exp.addBtn")}</button></div>
+            <div><SubmitButton className={btnCls}>{t("exp.addBtn")}</SubmitButton></div>
           </form>
         )}
       </Card>}
@@ -69,7 +70,7 @@ export default async function ExpensesPage() {
                             <input type="hidden" name="currency" value={e.currency} />
                             <input type="hidden" name="month" value={thisMonth} />
                             <input name="amount" type="number" step="0.01" min="0" required placeholder={actual != null ? t("exp.actualPhValue", { v: actual }) : t("exp.actualPh")} className="w-36 rounded border border-zinc-300 px-2 py-1 text-xs" />
-                            <button className="text-xs underline">{t("exp.logActual")}</button>
+                            <SubmitButton className="text-xs underline">{t("exp.logActual")}</SubmitButton>
                           </form>
                         )}
                       </td>
@@ -83,7 +84,7 @@ export default async function ExpensesPage() {
                       </td>
                       <td className="pl-3 text-right whitespace-nowrap">
                         <Link href={`/expenses/${e.id}`} className="mr-3 text-xs text-zinc-500 underline">{t("common.details")}</Link>
-                        {canWrite && <form action={deleteExpense} className="inline"><input type="hidden" name="id" value={e.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
+                        {canWrite && <form action={deleteExpense} className="inline"><input type="hidden" name="id" value={e.id} /><SubmitButton className={linkBtnCls}>{t("common.delete")}</SubmitButton></form>}
                       </td>
                     </tr>
                   );

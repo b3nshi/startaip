@@ -2,6 +2,7 @@ import { getCompanyCtx } from "@/lib/company";
 import { getT } from "@/lib/i18n/server";
 import { Card, Field, PageHeader, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { inviteMember, removeMember, revokeInvitation, updateRole } from "./actions";
+import { SubmitButton } from "@/components/submit-button";
 
 const ROLES = ["owner", "admin", "read_only"] as const;
 
@@ -31,7 +32,7 @@ export default async function TeamPage() {
             <Field label={t("team.role")}>
               <select name="role" defaultValue="read_only" className={inputCls}>{ROLES.map((r) => <option key={r} value={r}>{t(`role.${r}`)}</option>)}</select>
             </Field>
-            <div className="self-end"><button className={btnCls}>{t("team.sendInvite")}</button></div>
+            <div className="self-end"><SubmitButton className={btnCls}>{t("team.sendInvite")}</SubmitButton></div>
           </form>
           <p className="mt-3 text-xs text-zinc-500">{t("role.help")}</p>
         </Card>
@@ -47,9 +48,9 @@ export default async function TeamPage() {
                   <form action={updateRole} className="flex items-center gap-2">
                     <input type="hidden" name="user_id" value={m.user_id} />
                     {roleSelect("role", m.role)}
-                    <button className="text-xs underline">{t("team.save")}</button>
+                    <SubmitButton className="text-xs underline">{t("team.save")}</SubmitButton>
                   </form>
-                  <form action={removeMember}><input type="hidden" name="user_id" value={m.user_id} /><button className={linkBtnCls}>{t("common.remove")}</button></form>
+                  <form action={removeMember}><input type="hidden" name="user_id" value={m.user_id} /><SubmitButton className={linkBtnCls}>{t("common.remove")}</SubmitButton></form>
                 </span>
               ) : (
                 <span className="text-zinc-500">{t(`role.${m.role as (typeof ROLES)[number]}`)}</span>
@@ -65,7 +66,7 @@ export default async function TeamPage() {
             {(invites ?? []).map((i) => (
               <li key={i.id} className="flex items-center justify-between py-2">
                 <span>{i.email} <span className="text-zinc-500">· {t(`role.${i.role as (typeof ROLES)[number]}`)}</span></span>
-                <form action={revokeInvitation}><input type="hidden" name="id" value={i.id} /><button className={linkBtnCls}>{t("team.revoke")}</button></form>
+                <form action={revokeInvitation}><input type="hidden" name="id" value={i.id} /><SubmitButton className={linkBtnCls}>{t("team.revoke")}</SubmitButton></form>
               </li>
             ))}
           </ul>

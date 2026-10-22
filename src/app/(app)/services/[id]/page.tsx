@@ -7,6 +7,7 @@ import { intervalLabel, nextCharge, occurrences, todayISO } from "@/lib/recurren
 import { fmtDate, money, safeHref } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function ServicePage(props: PageProps<"/services/[id]">) {
   const { id } = await props.params;
@@ -45,7 +46,7 @@ export default async function ServicePage(props: PageProps<"/services/[id]">) {
           ))}
         </dl>
         {canWrite && (
-          <form action={deleteService} className="mt-4"><input type="hidden" name="id" value={service.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>
+          <form action={deleteService} className="mt-4"><input type="hidden" name="id" value={service.id} /><SubmitButton className={linkBtnCls}>{t("common.delete")}</SubmitButton></form>
         )}
       </Card>
 
@@ -64,7 +65,7 @@ export default async function ServicePage(props: PageProps<"/services/[id]">) {
             </Field>
             <Field label={t("svc.createdOn")}><input name="created_on" type="date" defaultValue={service.created_on ?? undefined} className={inputCls} /></Field>
             <Field label={t("svc.description")} className="sm:col-span-2 lg:col-span-3"><textarea name="description" rows={2} defaultValue={service.description ?? ""} className={inputCls} /></Field>
-            <div><button className={btnCls}>{t("common.save")}</button></div>
+            <div><SubmitButton className={btnCls}>{t("common.save")}</SubmitButton></div>
           </form>
         </Card>
       )}

@@ -4,6 +4,7 @@ import { loadData } from "@/lib/data";
 import { deletePartner, updatePartner } from "../../actions";
 import { Card, Field, PageHeader, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function PartnerPage(props: PageProps<"/partners/[id]">) {
   const { id } = await props.params;
@@ -24,10 +25,10 @@ export default async function PartnerPage(props: PageProps<"/partners/[id]">) {
             <Field label={t("common.email")}><input name="email" type="email" defaultValue={p.email ?? ""} className={inputCls} /></Field>
             <Field label={t("par.equityLbl")}><input name="equity_pct" type="number" step="0.01" min="0" max="100" defaultValue={p.equity_pct ?? undefined} className={inputCls} /></Field>
           </fieldset>
-          {canWrite && <div><button className={btnCls}>{t("common.save")}</button></div>}
+          {canWrite && <div><SubmitButton className={btnCls}>{t("common.save")}</SubmitButton></div>}
         </form>
         {canWrite && (
-          <form action={deletePartner} className="mt-4"><input type="hidden" name="id" value={p.id} /><button className={linkBtnCls}>{t("common.remove")}</button></form>
+          <form action={deletePartner} className="mt-4"><input type="hidden" name="id" value={p.id} /><SubmitButton className={linkBtnCls}>{t("common.remove")}</SubmitButton></form>
         )}
       </Card>
     </>

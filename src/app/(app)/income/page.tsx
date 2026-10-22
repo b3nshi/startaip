@@ -6,6 +6,7 @@ import { intervalLabel, nextCharge, todayISO } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function IncomePage() {
   const { income, rateSets, rateSetFor, ratesFor, services, canWrite } = await loadData();
@@ -22,7 +23,7 @@ export default async function IncomePage() {
           <ServiceSelect services={services} />
           <RateSelect rateSets={rateSets} withMode />
           <RecurrenceFields />
-          <div><button className={btnCls}>{t("inc.addBtn")}</button></div>
+          <div><SubmitButton className={btnCls}>{t("inc.addBtn")}</SubmitButton></div>
         </form>
       </Card>}
       <Card>
@@ -52,7 +53,7 @@ export default async function IncomePage() {
                       </td>
                       <td className="pl-3 text-right whitespace-nowrap">
                         <Link href={`/income/${i.id}`} className="mr-3 text-xs text-zinc-500 underline">{t("common.details")}</Link>
-                        {canWrite && <form action={deleteIncome} className="inline"><input type="hidden" name="id" value={i.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
+                        {canWrite && <form action={deleteIncome} className="inline"><input type="hidden" name="id" value={i.id} /><SubmitButton className={linkBtnCls}>{t("common.delete")}</SubmitButton></form>}
                       </td>
                     </tr>
                   );

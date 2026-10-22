@@ -5,6 +5,7 @@ import { Logo } from "@/components/logo";
 import { Nav } from "@/components/nav";
 import { CompanySwitcher, CurrencySwitcher, LangSwitcher } from "@/components/switchers";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { me, companies, company, role, canWrite } = await getCompanyCtx();
@@ -20,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mt-4 text-xs text-zinc-500">
           <p>{me.name}</p>
           <p>{t(`role.${role}`)}</p>
-          <form action={signOut}><button className="mt-1 underline">{t("common.signOut")}</button></form>
+          <form action={signOut}><SubmitButton className="mt-1 underline">{t("common.signOut")}</SubmitButton></form>
         </div>
       </aside>
       <main className="min-w-0 flex-1">

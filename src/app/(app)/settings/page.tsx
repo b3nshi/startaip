@@ -7,6 +7,7 @@ import { todayISO } from "@/lib/recurrence";
 import { getCompanyCtx } from "@/lib/company";
 import { NOTIFY_CATEGORIES } from "@/lib/notifications";
 import { getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 const OTHERS = CURRENCIES.filter((c) => c !== "USD");
 
@@ -42,7 +43,7 @@ export default async function SettingsPage() {
               <input type="checkbox" name="notify" value={k} defaultChecked={!muted.has(k)} /> {t(`notif.${k}`)}
             </label>
           ))}
-          <div className="pt-2"><button className={btnCls}>{t("common.save")}</button></div>
+          <div className="pt-2"><SubmitButton className={btnCls}>{t("common.save")}</SubmitButton></div>
         </form>
       </Card>
 
@@ -53,7 +54,7 @@ export default async function SettingsPage() {
             <Field label={t("common.date")}><input name="effective_date" type="date" required defaultValue={todayISO()} className={inputCls} /></Field>
             <RateInputs rates={latest?.rates} />
             <Field label={t("common.note")} className="sm:col-span-2 lg:col-span-4"><input name="note" placeholder={t("rate.notePh")} className={inputCls} /></Field>
-            <div><button className={btnCls}>{t("rate.addBtn")}</button></div>
+            <div><SubmitButton className={btnCls}>{t("rate.addBtn")}</SubmitButton></div>
           </form>
         </Card>
       )}
@@ -75,14 +76,14 @@ export default async function SettingsPage() {
                   <Field label={t("common.date")}><input name="effective_date" type="date" required defaultValue={r.effective_date} disabled={!canWrite} className={inputCls} /></Field>
                   <RateInputs rates={r.rates} disabled={!canWrite} />
                   <Field label={t("common.note")} className="sm:col-span-2 lg:col-span-4"><input name="note" defaultValue={r.note ?? ""} disabled={!canWrite} className={inputCls} /></Field>
-                  {canWrite && <div><button className={btnCls}>{t("common.save")}</button></div>}
+                  {canWrite && <div><SubmitButton className={btnCls}>{t("common.save")}</SubmitButton></div>}
                 </form>
                 {canWrite && (
                   <div className="mt-2 flex items-center gap-3">
                     {used > 0 && <span className="text-xs text-zinc-500">{t("rate.editWarn", { n: used })}</span>}
                     <form action={deleteRateSet} className="ml-auto">
                       <input type="hidden" name="id" value={r.id} />
-                      <button className={linkBtnCls} disabled={used > 0} title={used > 0 ? t("err.rateInUse") : undefined}>{t("common.delete")}</button>
+                      <SubmitButton className={linkBtnCls} disabled={used > 0} title={used > 0 ? t("err.rateInUse") : undefined}>{t("common.delete")}</SubmitButton>
                     </form>
                   </div>
                 )}

@@ -4,6 +4,7 @@ import { loadData } from "@/lib/data";
 import { deleteCashIn, updateCashIn } from "../../actions";
 import { AmountFields, Card, Field, PageHeader, RateDetails, RateSelect, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function CashInDetailPage(props: PageProps<"/cash-in/[id]">) {
   const { id } = await props.params;
@@ -39,10 +40,10 @@ export default async function CashInDetailPage(props: PageProps<"/cash-in/[id]">
             <Field label={t("cash.method")}><input name="method" defaultValue={c.method ?? ""} className={inputCls} /></Field>
             <Field label={t("cash.concept")} className="sm:col-span-2 lg:col-span-3"><input name="concept" required defaultValue={c.concept} className={inputCls} /></Field>
           </fieldset>
-          {canWrite && <div><button className={btnCls}>{t("common.save")}</button></div>}
+          {canWrite && <div><SubmitButton className={btnCls}>{t("common.save")}</SubmitButton></div>}
         </form>
         {canWrite && (
-          <form action={deleteCashIn} className="mt-4"><input type="hidden" name="id" value={c.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>
+          <form action={deleteCashIn} className="mt-4"><input type="hidden" name="id" value={c.id} /><SubmitButton className={linkBtnCls}>{t("common.delete")}</SubmitButton></form>
         )}
       </Card>
     </>

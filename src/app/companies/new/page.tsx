@@ -5,6 +5,7 @@ import { getT } from "@/lib/i18n/server";
 import { LangSwitcher } from "@/components/switchers";
 import { Card, Field, btnCls, inputCls } from "@/components/ui";
 import { signOut } from "@/app/login/actions";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function NewCompanyPage() {
   const { supabase, user } = await requireUser();
@@ -19,12 +20,12 @@ export default async function NewCompanyPage() {
         <form action={createCompany} className="space-y-3">
           <Field label={t("co.name")}><input name="name" required autoFocus placeholder={t("co.namePh")} className={inputCls} /></Field>
           <div className="flex items-center gap-3">
-            <button className={btnCls}>{t("co.create")}</button>
+            <SubmitButton className={btnCls}>{t("co.create")}</SubmitButton>
             {count ? <Link href="/dashboard" className="text-sm text-zinc-500 underline">{t("co.cancel")}</Link> : null}
           </div>
         </form>
       </Card>
-      {!count && <form action={signOut} className="mt-4 text-center"><button className="text-sm text-zinc-500 underline">{t("common.signOut")}</button></form>}
+      {!count && <form action={signOut} className="mt-4 text-center"><SubmitButton className="text-sm text-zinc-500 underline">{t("common.signOut")}</SubmitButton></form>}
     </main>
   );
 }

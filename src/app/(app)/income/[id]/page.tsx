@@ -5,6 +5,7 @@ import { deleteIncome, updateIncome } from "../../actions";
 import { AmountFields, Card, Field, OccurrenceRates, PageHeader, RateDetails, RateSelect, RecurrenceFields, ServiceSelect, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { occurrences, todayISO } from "@/lib/recurrence";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function IncomeDetailPage(props: PageProps<"/income/[id]">) {
   const { id } = await props.params;
@@ -35,10 +36,10 @@ export default async function IncomeDetailPage(props: PageProps<"/income/[id]">)
             <RateSelect rateSets={rateSets} value={byDate ? i.rate_set_id : set?.id} mode={i.rate_mode} withMode />
             <RecurrenceFields value={i} />
           </fieldset>
-          {canWrite && <div><button className={btnCls}>{t("common.save")}</button></div>}
+          {canWrite && <div><SubmitButton className={btnCls}>{t("common.save")}</SubmitButton></div>}
         </form>
         {canWrite && (
-          <form action={deleteIncome} className="mt-4"><input type="hidden" name="id" value={i.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>
+          <form action={deleteIncome} className="mt-4"><input type="hidden" name="id" value={i.id} /><SubmitButton className={linkBtnCls}>{t("common.delete")}</SubmitButton></form>
         )}
       </Card>
     </>

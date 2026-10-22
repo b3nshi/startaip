@@ -4,6 +4,7 @@ import { loadData } from "@/lib/data";
 import { deleteTransfer, updateTransfer } from "../../../actions";
 import { AmountFields, Card, Field, PageHeader, RateDetails, RateSelect, btnCls, inputCls, linkBtnCls } from "@/components/ui";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function TransferPage(props: PageProps<"/partners/transfers/[id]">) {
   const { id } = await props.params;
@@ -36,10 +37,10 @@ export default async function TransferPage(props: PageProps<"/partners/transfers
             <Field label={t("common.date")}><input name="date" type="date" required defaultValue={x.date} className={inputCls} /></Field>
             <Field label={t("common.note")} className="sm:col-span-2"><input name="note" defaultValue={x.note ?? ""} className={inputCls} /></Field>
           </fieldset>
-          {canWrite && <div><button className={btnCls}>{t("common.save")}</button></div>}
+          {canWrite && <div><SubmitButton className={btnCls}>{t("common.save")}</SubmitButton></div>}
         </form>
         {canWrite && (
-          <form action={deleteTransfer} className="mt-4"><input type="hidden" name="id" value={x.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>
+          <form action={deleteTransfer} className="mt-4"><input type="hidden" name="id" value={x.id} /><SubmitButton className={linkBtnCls}>{t("common.delete")}</SubmitButton></form>
         )}
       </Card>
     </>

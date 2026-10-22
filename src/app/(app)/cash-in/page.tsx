@@ -6,6 +6,7 @@ import { todayISO } from "@/lib/recurrence";
 import { fmtDate, money } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function CashInPage() {
   const { partners, cashIns, rateSets, rateSetFor, ratesFor, canWrite } = await loadData();
@@ -42,7 +43,7 @@ export default async function CashInPage() {
               <RateSelect rateSets={rateSets} />
               <Field label={t("cash.method")}><input name="method" placeholder={t("cash.methodPh")} className={inputCls} /></Field>
               <Field label={t("cash.concept")} className="sm:col-span-2 lg:col-span-3"><input name="concept" required placeholder={t("cash.conceptPh")} className={inputCls} /></Field>
-              <div><button className={btnCls}>{t("cash.addBtn")}</button></div>
+              <div><SubmitButton className={btnCls}>{t("cash.addBtn")}</SubmitButton></div>
             </form>
           </>
         )}
@@ -81,7 +82,7 @@ export default async function CashInPage() {
                     </td>
                     <td className="pl-3 text-right whitespace-nowrap">
                       <Link href={`/cash-in/${c.id}`} className="mr-3 text-xs text-zinc-500 underline">{t("common.details")}</Link>
-                      {canWrite && <form action={deleteCashIn} className="inline"><input type="hidden" name="id" value={c.id} /><button className={linkBtnCls}>{t("common.delete")}</button></form>}
+                      {canWrite && <form action={deleteCashIn} className="inline"><input type="hidden" name="id" value={c.id} /><SubmitButton className={linkBtnCls}>{t("common.delete")}</SubmitButton></form>}
                     </td>
                   </tr>
                 ))}

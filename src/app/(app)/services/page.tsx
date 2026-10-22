@@ -6,6 +6,7 @@ import { monthlyEquivalent, todayISO } from "@/lib/recurrence";
 import { fmtDate, money, safeHref } from "@/lib/format";
 import { convert } from "@/lib/currency";
 import { getDisplayCurrency, getT } from "@/lib/i18n/server";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function ServicesPage() {
   const { services, partners, expenses, income, ratesFor, canWrite } = await loadData();
@@ -34,7 +35,7 @@ export default async function ServicesPage() {
           </Field>
           <Field label={t("svc.createdOn")}><input name="created_on" type="date" className={inputCls} /></Field>
           <Field label={t("svc.description")} className="sm:col-span-2 lg:col-span-3"><textarea name="description" rows={2} placeholder={t("svc.descPh")} className={inputCls} /></Field>
-          <div><button className={btnCls}>{t("svc.addBtn")}</button></div>
+          <div><SubmitButton className={btnCls}>{t("svc.addBtn")}</SubmitButton></div>
         </form>
       </Card>}
 
