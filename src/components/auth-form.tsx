@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useActionState } from "react";
 import { sendCode, verifyCode, type AuthState } from "@/app/login/actions";
@@ -22,6 +23,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       <div className="absolute right-4 top-4"><LangSwitcher /></div>
       <form action={action} className="w-full max-w-sm space-y-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div>
+          <Logo size={40} className="mb-3" />
           <h1 className="text-xl font-semibold">{signup && state.step === "email" ? t("auth.signupTitle") : "Startup Costs"}</h1>
           <p className="mt-1 text-sm text-zinc-500">
             {state.step === "email" ? (signup ? "" : t("login.subEmail")) : t("login.subCode", { email: state.email ?? "" })}

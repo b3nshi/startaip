@@ -1,6 +1,6 @@
 # Startup Costs
 
-Next.js + Supabase app to track startup expenses, income and partner investments.
+Track startup expenses, income, partner investments and who owes whom, across several companies, languages and currencies.
 
 ## Setup
 
@@ -55,6 +55,6 @@ alter default privileges in schema public grant all on functions to anon, authen
 
 - **English / Español**: defaults to the browser language (`Accept-Language`); the switcher in the sidebar (and on the login page) saves your choice in a cookie. Strings live in `src/lib/i18n/dict.ts`; add a language by adding a column there.
 - **USD, EUR, ARS**: every expense, income and owed amount keeps its own currency. Totals, the dashboard and partner balances are converted into the currency picked in the sidebar.
-- **Exchange rates** are manual: Settings → "1 USD = X EUR / ARS", stored in `exchange_rates` (seeded with placeholder values, set real ones first). One current rate applies to all dates, with no history. To add a currency, extend `CURRENCIES` in `src/lib/currency.ts` and the currency checks via a new migration.
+- **Exchange rates** are manual and kept as a history of rate sets (Settings → rates, stored in `rate_sets`). Every expense, income, cash-in and transfer points at one, so records created together share a rate: edit the set to change them all, or pick another set on a single record. Recurring charges can follow the rate in force on each charge date. To add a currency, extend `CURRENCIES` in `src/lib/currency.ts` and the currency checks via a new migration.
 
 Income does not affect partner balances.
